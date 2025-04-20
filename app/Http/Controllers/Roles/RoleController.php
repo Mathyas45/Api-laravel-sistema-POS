@@ -15,14 +15,21 @@ class RoleController extends Controller
     {
         $search = request()->query("search");
         $roles = Role::where("name", "ilike", "%" . $search . "%")
-            ->orderBy("name", "desc")
-            ->paginate(10);
+            ->orderBy("id", "desc")->get();
         return response()->json([
             "roles" => $roles->map(function ($role) {
                 return [
                     "id" => $role->id,
                     "name" => $role->name,
                     "created_at" => $role->created_at->format("Y/m/d h:i:s"),
+                    "permissions" => $role->permissions->map(function ($permission) {
+                        return [
+                            "id" => $permission->id,
+                            "name" => $permission->name,
+                        ];
+                    }),
+                    //ponerlo en un array simple
+                    "permissions_pluck" => $role->permissions->pluck("name"),
                 ];
             })
         ]);
@@ -33,12 +40,13 @@ class RoleController extends Controller
      */
     public function store(Request $request)
     {
-        // $exist_role = Role::where("name", $request->name)->first();
-        // if ($exist_role) {
-        //     return response()->json([
-        //         "message" => "El rol ya existe",
-        //     ], 422);
-        // }
+        $exist_role = Role::where("name", $request->name)->first();
+        if ($exist_role) {
+            return response()->json([
+                "message" => "403",
+                "message_text" => "El rol ya existe",
+            ]);
+        }
         $request->validate([
             "name" => "required|string|max:255|unique:roles,name",
         ]);
@@ -51,10 +59,21 @@ class RoleController extends Controller
         foreach ($permissions as $permission) {
             $role->givePermissionTo($permission);
         }
-
         return response()->json([
             "message" => 200,
-            "role" => $role,
+            "role" => [
+                "id" => $role->id,
+                "name" => $role->name,
+                "created_at" => $role->created_at->format("Y/m/d h:i:s"),
+                "permissions" => $role->permissions->map(function ($permission) {
+                    return [
+                        "id" => $permission->id,
+                        "name" => $permission->name,
+                    ];
+                }),
+                //ponerlo en un array simple
+                "permissions_pluck" => $role->permissions->pluck("name"),
+            ],
         ]);
     }
 
@@ -87,10 +106,21 @@ class RoleController extends Controller
         $permissions = $request->permissions;
         $role->syncPermissions($permissions);
 
-
         return response()->json([
             "message" => 200,
-            "role" => $role,
+            "role" => [
+                "id" => $role->id,
+                "name" => $role->name,
+                "created_at" => $role->created_at->format("Y/m/d h:i:s"),
+                "permissions" => $role->permissions->map(function ($permission) {
+                    return [
+                        "id" => $permission->id,
+                        "name" => $permission->name,
+                    ];
+                }),
+                //ponerlo en un array simple
+                "permissions_pluck" => $role->permissions->pluck("name"),
+            ],
         ]);
     }
 
