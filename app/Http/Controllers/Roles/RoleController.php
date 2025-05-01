@@ -15,7 +15,10 @@ class RoleController extends Controller
     {
         $search = request()->query("search");
         $roles = Role::where("name", "ilike", "%" . $search . "%")
-            ->orderBy("id", "desc")->get();
+            ->where("reg_estado", 1)
+            ->orderBy("id", "desc")
+            ->get();
+
         return response()->json([
             "roles" => $roles->map(function ($role) {
                 return [
@@ -129,17 +132,19 @@ class RoleController extends Controller
      */
     public function destroy(string $id)
     {
-        //eliminacion de rol pero eliminacion logico
+        //eliminacion de rol pero eliminacion logica
         $role = Role::find($id);
         if (!$role) {
             return response()->json([
                 "message" => "Rol no encontrado",
             ], 404);
         }
-        $role->delete();
+        $role->update([
+            "reg_estado" => 0,
+            "deleted_at" => now(),
+        ]);
         return response()->json([
             "message" => 200,
-            "role" => $role,
         ]);
     }
 }

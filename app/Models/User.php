@@ -3,19 +3,21 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Config\Sucursale;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
-use Spatie\Permission\Traits\HasRoles;
 
 
 class User extends Authenticatable  implements JWTSubject
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
-    use HasRoles;
+    use SoftDeletes;
 
 
     /**
@@ -30,6 +32,12 @@ class User extends Authenticatable  implements JWTSubject
         'surname',
         'avatar',
         'role_id',
+        'sucursal_id',
+        'reg_estado',
+        "phone",
+        "type_document",
+        "n_document",
+        "gender",
     ];
 
     /**
@@ -73,8 +81,12 @@ class User extends Authenticatable  implements JWTSubject
     {
         return [];
     }
-    public function role(){
-        return $this->belongsTo(Role::class,"role_id");
+    public function role()
+    {
+        return $this->belongsTo(Role::class, "role_id");
     }
-
+    public function sucursal()
+    {
+        return $this->belongsTo(Sucursale::class, "sucursal_id");
+    }
 }

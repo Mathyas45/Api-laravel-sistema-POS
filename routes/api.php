@@ -4,6 +4,7 @@
 use Illuminate\Support\Facades\Route;
 use Spatie\Permission\Contracts\Role;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\user\userController;
 use App\Http\Controllers\Roles\RoleController;
 
 Route::group([
@@ -21,4 +22,5 @@ Route::group([
     "middleware" => ["auth:api"]
 ], function () {
     Route::resource('roles', RoleController::class);
+    Route::resource('users', userController::class);
 });
